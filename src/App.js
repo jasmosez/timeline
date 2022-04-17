@@ -5,18 +5,19 @@ import { SVG } from '@svgdotjs/svg.js'
 
 const dim = 600
 
-
 function App() {
-  // const [times, setTimes] = useState({});
-  const dateISO = '2022-01-08'
-  // const date = new Date(dateISO)
+  const headerTime = new Date()
+  const headerText = headerTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  const dateISO = headerTime.toISOString().slice(0, 10)
+  
   const zip = '19143'
   const api = `https://www.hebcal.com/zmanim?cfg=json&zip=${zip}&date=${dateISO}`
 
 
   useEffect(()=>{
-    const draw = SVG().addTo('div.App').size(dim * 1.5, dim).viewbox(0, 0, dim, dim)
-    drawClock(draw)
+    const draw = SVG().addTo('div.timeline').size(dim * 1.5, dim).viewbox(0, 0, dim, dim)
+    drawTimeline(draw)
+    // drawClock(draw)
     fetchTimes(draw)
     // setInterval(runClock, 1000);
 
@@ -64,6 +65,11 @@ function App() {
   }
 
 
+  const drawTimeline = (draw) => {
+    draw.line( -50, 25, 670, 25).stroke({width: 1, color: '#000'})
+  }
+
+
   const drawClock = (draw) => {
     const hourMarksPath = 'M300.5 94V61M506 300.5h32M300.5 506v33M94 300.5H60M411.3 107.8l7.9-13.8M493 190.2l13-7.4M492.1 411.4l16.5 9.5M411 492.3l8.9 15.3M189 492.3l-9.2 15.9M107.7 411L93 419.5M107.5 189.3l-17.1-9.9M188.1 108.2l-9-15.6'
 
@@ -88,6 +94,30 @@ function App() {
 
   const placeDots = (draw, times) => {
     const timeKeys = Object.keys(times)
+    let options = { hour: 'numeric', minute: 'numeric' }
+    timeKeys.forEach(name => {
+      console.log(name, times[name])
+      const zman = new Date(times[name])
+      const hours = zman.getHours()
+      const minutes = zman.getMinutes()
+      const dist = hours * 30 + minutes / 2 - 50
+      
+      const dot = draw.group()
+      dot.circle().radius(3).center(dist, 25).addClass('dot').id(name)
+      dot.text(name + ' (' + zman.toLocaleString("en-US", options) + ')').move(dist, 50).transform({rotate: 90, origin: [dist + 12, 50]}).font({family: 'Helvetica', size: 10})
+
+    })
+    const zman = new Date()
+    const hours = zman.getHours()
+    const minutes = zman.getMinutes()
+    const dist = hours * 30 + minutes / 2 - 50
+    draw.circle().radius(3).center(dist, 25).fill('#000').id('now')
+    draw.text(`now (${zman.toLocaleString("en-US", options)})`).move(dist, 50).transform({rotate: 90, origin: [dist + 12, 50]}).font({family: 'Helvetica', size: 10})
+  }
+
+
+  const placeDotsOnCircle = (draw, times) => {
+    const timeKeys = Object.keys(times)
     timeKeys.forEach(name => {
       console.log(name, times[name])
       const zman = new Date(times[name])
@@ -97,16 +127,25 @@ function App() {
       
       const dot = draw.group()
       dot.circle().radius(10).center(300, 46.1).fill('none')
-      dot.circle().radius(10).center(300, 553.9).addClass('dot').id(name)
-  
+      const marker = dot.circle().radius(10).center(300, 553.9).addClass('dot').id(name)
+      
       dot.transform({rotate: rotation})
+      console.log(marker, marker.transform())
+
+      // console.log(marker.cx())
+      // console.log(marker.cy())
+
     })
   }
 
 
-
   return (
-    <div className="App" />
+    <div className="App" >
+      <div className="header">
+        {headerText}
+      </div>
+      <div className="timeline" />
+    </div>
   );
 }
 

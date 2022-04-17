@@ -1,5 +1,5 @@
 export const ourZmanim = [
-    "chatzotNight",
+    // "chatzotNight",
     "alotHaShachar",
     "misheyakir",
     "dawn",
