@@ -5,7 +5,6 @@ import { SVG } from '@svgdotjs/svg.js'
 
 const DIM = 600
 const ZIP = '19143'
-const MINUTE_MS = 60000;
 const SECOND_MS = 1000;
 
 
@@ -19,7 +18,7 @@ function App() {
   const [dotsGroup, setDotsGroup] = useState()
   
 
-  // initial draw, setInterval for nowTime
+  // initial draw, setInterval (1s) for nowTime
   useEffect(async ()=>{
     const svgDraw = SVG().addTo('div.timeline').size(DIM * 1.5, DIM).viewbox(0, 0, DIM, DIM)
     drawTimeline(svgDraw)
@@ -34,21 +33,21 @@ function App() {
   }, [])
 
 
-  // setHeaderText
+  // when headerTime changes...
   useEffect(()=>{
     setHeaderText(headerTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))  
     draw && fetchTimes()
   }, [headerTime, draw])
   
 
-  // nowTime
+  // Every second (when nowTime changes)...
   useEffect(() => {
     checkNowDot()
     checkHeader()
   }, [nowTime, draw])
 
 
-  // Check if header needs updating. 
+  // Check if the 'now dot' needs updating. (On minute change)
   const checkNowDot = () => {
     const nowMinute = new Date(nowTime.getFullYear(), nowTime.getMonth(), nowTime.getDate(), nowTime.getHours(), nowTime.getMinutes())
     if (nowMinute.getTime() > nowLabelTime.getTime()) {
@@ -58,7 +57,7 @@ function App() {
   }
   
 
-  // Check if header needs updating. 
+  // Check if header needs updating. (On date change)
   const checkHeader = () => {
     const nowDate = new Date(nowTime.getFullYear(), nowTime.getMonth(), nowTime.getDate())
     if (nowDate.getTime() > headerTime.getTime()) {
@@ -107,8 +106,9 @@ function App() {
     })
   }
 
+
   const placeNowDot = () => {
-    let options = { hour: 'numeric', minute: 'numeric', second: 'numeric' }
+    let options = { hour: 'numeric', minute: 'numeric' }
     const hours = nowTime.getHours()
     const minutes = nowTime.getMinutes()
     const dist = hours * 30 + minutes / 2 - 50
@@ -135,5 +135,6 @@ function App() {
     </div>
   );
 }
+
 
 export default App;
