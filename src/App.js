@@ -3,7 +3,7 @@ import './App.css';
 import {ourZmanim} from './lib/util.js'
 import { SVG } from '@svgdotjs/svg.js'
 
-const DIM = 600
+const DIM = 800
 const ZIP = '19143'
 const SECOND_MS = 1000;
 
@@ -20,7 +20,7 @@ function App() {
 
   // initial draw, setInterval (1s) for nowTime
   useEffect(async ()=>{
-    const svgDraw = SVG().addTo('div.timeline').size(DIM * 1.5, DIM).viewbox(0, 0, DIM, DIM)
+    const svgDraw = SVG().addTo('div.timeline').size(800, 800).viewbox(0, 0, DIM, DIM)
     drawTimeline(svgDraw)
     setDraw(svgDraw)
 
@@ -122,7 +122,7 @@ function App() {
 
 
   const drawTimeline = (draw) => {
-    draw.line( -50, 25, 670, 25).stroke({width: 1, color: '#000'})
+    draw.line( 0, 25, DIM, 25).stroke({width: 1, color: '#000'})
   }
 
 
