@@ -19,7 +19,7 @@ function App() {
   
 
   // initial draw, setInterval (1s) for nowTime
-  useEffect(async ()=>{
+  useEffect(()=>{
     const svgDraw = SVG().addTo('div.timeline').size(800, 800).viewbox(0, 0, DIM, DIM)
     drawTimeline(svgDraw)
     setDraw(svgDraw)
@@ -37,6 +37,7 @@ function App() {
   useEffect(()=>{
     setHeaderText(headerTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))  
     draw && fetchTimes()
+    // eslint-disable-next-line
   }, [headerTime, draw])
   
 
@@ -44,6 +45,7 @@ function App() {
   useEffect(() => {
     checkNowDot()
     checkHeader()
+    // eslint-disable-next-line
   }, [nowTime, draw])
 
 
@@ -66,7 +68,7 @@ function App() {
   }
   
 
-  const fetchTimes = async () => {
+  const fetchTimes = () => {
     const dateISO = headerTime.toISOString().slice(0, 10)
     const api = `https://www.hebcal.com/zmanim?cfg=json&zip=${ZIP}&date=${dateISO}`
 
