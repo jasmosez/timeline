@@ -3,26 +3,74 @@ import './App.css';
 import {ourZmanim} from './lib/util.js'
 import { SVG } from '@svgdotjs/svg.js'
 
-const dim = 600
+const DIM = 600
+const ZIP = '19143'
+const MINUTE_MS = 60000;
+const SECOND_MS = 1000;
+
 
 function App() {
-  const headerTime = new Date()
-  const headerText = headerTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-  const dateISO = headerTime.toISOString().slice(0, 10)
+  const [nowTime, setNowTime] = useState(new Date())
+  const [nowLabelTime, setNowLabelTime] = useState(new Date())
+  const [headerTime, setHeaderTime] = useState(new Date())
+  const [headerText, setHeaderText] = useState('')
+  const [draw, setDraw] = useState()
+  const [nowGroup, setNowGroup] = useState()
+  const [dotsGroup, setDotsGroup] = useState()
   
-  const zip = '19143'
-  const api = `https://www.hebcal.com/zmanim?cfg=json&zip=${zip}&date=${dateISO}`
+
+  // initial draw, setInterval for nowTime
+  useEffect(async ()=>{
+    const svgDraw = SVG().addTo('div.timeline').size(DIM * 1.5, DIM).viewbox(0, 0, DIM, DIM)
+    drawTimeline(svgDraw)
+    setDraw(svgDraw)
+
+    const interval = setInterval(() => {
+      setNowTime(new Date())
+    }, SECOND_MS);
+  
+    return () => clearInterval(interval);
+
+  }, [])
 
 
+  // setHeaderText
   useEffect(()=>{
-    const draw = SVG().addTo('div.timeline').size(dim * 1.5, dim).viewbox(0, 0, dim, dim)
-    drawTimeline(draw)
-    fetchTimes(draw)
-
-  }, [dateISO])
+    setHeaderText(headerTime.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))  
+    draw && fetchTimes()
+  }, [headerTime, draw])
   
 
-  const fetchTimes = async (draw) => {
+  // nowTime
+  useEffect(() => {
+    checkNowDot()
+    checkHeader()
+  }, [nowTime, draw])
+
+
+  // Check if header needs updating. 
+  const checkNowDot = () => {
+    const nowMinute = new Date(nowTime.getFullYear(), nowTime.getMonth(), nowTime.getDate(), nowTime.getHours(), nowTime.getMinutes())
+    if (nowMinute.getTime() > nowLabelTime.getTime()) {
+      setNowLabelTime(nowMinute)
+      placeNowDot()
+    }
+  }
+  
+
+  // Check if header needs updating. 
+  const checkHeader = () => {
+    const nowDate = new Date(nowTime.getFullYear(), nowTime.getMonth(), nowTime.getDate())
+    if (nowDate.getTime() > headerTime.getTime()) {
+      setHeaderTime(nowDate)
+    }
+  }
+  
+
+  const fetchTimes = async () => {
+    const dateISO = headerTime.toISOString().slice(0, 10)
+    const api = `https://www.hebcal.com/zmanim?cfg=json&zip=${ZIP}&date=${dateISO}`
+
     fetch(api)
     .then(resp => resp.json())
     .then(json => {
@@ -31,14 +79,20 @@ function App() {
         cur[key] = json.times[key]
         return cur
       }, {})
-      placeDots(draw, times)
+      placeZmanim(times)
+      placeNowDot()
     })
   }
 
 
-  const placeDots = (draw, times) => {
+  const placeZmanim = (times) => {
     const timeKeys = Object.keys(times)
     let options = { hour: 'numeric', minute: 'numeric' }
+
+    const dots = draw.group()
+    dotsGroup && dotsGroup.remove()
+    setDotsGroup(dots)
+
     timeKeys.forEach(name => {
       console.log(name, times[name])
       const zman = new Date(times[name])
@@ -46,17 +100,24 @@ function App() {
       const minutes = zman.getMinutes()
       const dist = hours * 30 + minutes / 2 - 50
       
-      const dot = draw.group()
+      const dot = dots.group()
       dot.circle().radius(3).center(dist, 25).id(name)
       dot.text(name + ' (' + zman.toLocaleString("en-US", options) + ')').move(dist, 50).transform({rotate: 90, origin: [dist + 12, 50]}).font({family: 'Helvetica', size: 10})
 
     })
-    const zman = new Date()
-    const hours = zman.getHours()
-    const minutes = zman.getMinutes()
+  }
+
+  const placeNowDot = () => {
+    let options = { hour: 'numeric', minute: 'numeric', second: 'numeric' }
+    const hours = nowTime.getHours()
+    const minutes = nowTime.getMinutes()
     const dist = hours * 30 + minutes / 2 - 50
-    draw.circle().radius(3).center(dist, 25).addClass('dot').id('now')
-    draw.text(`now (${zman.toLocaleString("en-US", options)})`).move(dist, 50).transform({rotate: 90, origin: [dist + 12, 50]}).font({family: 'Helvetica', size: 10, color: '#F77'})
+
+    const group = draw.group()
+    nowGroup && nowGroup.remove()
+    setNowGroup(group)
+    group.circle().radius(3).center(dist, 25).addClass('dot').id('now')
+    group.text(`now (${nowTime.toLocaleString("en-US", options)})`).move(dist, 50).transform({rotate: 90, origin: [dist + 12, 50]}).font({family: 'Helvetica', size: 10}).fill('#F77')
   }
 
 
