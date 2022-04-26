@@ -44,6 +44,7 @@ function App() {
   const [nowGroup, setNowGroup] = useState()
   const [dotsGroup, setDotsGroup] = useState()
   const [orientation, setOrientation] = useState('portrait')
+  const [checked, setChecked] = useState(false)
 
   // initial draw, setInterval (1s) for nowTime
   useEffect(()=>{
@@ -57,7 +58,8 @@ function App() {
   
     return () => clearInterval(interval);
 
-  }, [])
+    // eslint-disable-next-line
+  }, [checked])
 
 
   // when headerTime changes...
@@ -75,6 +77,13 @@ function App() {
     // eslint-disable-next-line
   }, [nowTime, draw])
 
+
+  const handleCheckToggle = () => {
+    checked && setOrientation('portrait')
+    !checked && setOrientation('landscape')
+    setChecked(!checked)
+    draw.remove()
+  }
 
   // Check if the 'now dot' needs updating. (On minute change)
   const checkNowDot = () => {
@@ -172,6 +181,16 @@ function App() {
     <div className="App" >
       <div className="header">
         {headerText}
+      </div>
+      <div>
+        <label>
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={handleCheckToggle}
+          />
+          Landscape
+        </label>
       </div>
       <div className="timeline" />
     </div>
