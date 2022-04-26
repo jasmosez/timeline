@@ -13,6 +13,7 @@
   justify-content: center;
 }
 
-.dot {
+#now, #now-label {
   fill: #F77;
 }
+
