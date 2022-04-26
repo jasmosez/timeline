@@ -5,8 +5,38 @@ import { SVG } from '@svgdotjs/svg.js'
 
 const DIM = 800
 const ZIP = '19143'
-const SECOND_MS = 1000;
+const SECOND_MS = 1000
+const DOT_SIZE = 3
+const LANDSCAPE_Y = 25
+const PORTRAIT_X = 25
+const LABEL_PADDING = 10
+const FONT_SIZE = 10
+const TWEAK_RATIO = 0.3
+const TWEAK = FONT_SIZE * TWEAK_RATIO
 
+
+const COORDINATES = {
+  landscape: {
+    timeline: {
+      x1: 0,
+      y1: LANDSCAPE_Y,
+      x2: DIM,
+      y2: LANDSCAPE_Y
+    },
+    zmanY: LANDSCAPE_Y,
+    zmanLabelY: LANDSCAPE_Y + LABEL_PADDING
+  },
+  portrait: {
+    timeline: {
+      x1: PORTRAIT_X,
+      y1: 0,
+      x2: PORTRAIT_X,
+      y2: DIM
+    },
+    zmanX: PORTRAIT_X,
+    zmanLabelX: PORTRAIT_X + LABEL_PADDING
+  },
+}
 
 function App() {
   const [nowTime, setNowTime] = useState(new Date())
@@ -16,7 +46,7 @@ function App() {
   const [draw, setDraw] = useState()
   const [nowGroup, setNowGroup] = useState()
   const [dotsGroup, setDotsGroup] = useState()
-  
+  const [orientation, setOrientation] = useState('portrait')
 
   // initial draw, setInterval (1s) for nowTime
   useEffect(()=>{
@@ -95,16 +125,29 @@ function App() {
     setDotsGroup(dots)
 
     timeKeys.forEach(name => {
-      console.log(name, times[name])
       const zman = new Date(times[name])
       const hours = zman.getHours()
       const minutes = zman.getMinutes()
       const dist = hours * 30 + minutes / 2 - 50
       
-      const dot = dots.group()
-      dot.circle().radius(3).center(dist, 25).id(name)
-      dot.text(name + ' (' + zman.toLocaleString("en-US", options) + ')').move(dist, 50).transform({rotate: 90, origin: [dist + 12, 50]}).font({family: 'Helvetica', size: 10})
+      let x, y, labelX, labelY, transformation
+      if (orientation === 'landscape') {
+        x = dist
+        y = LANDSCAPE_Y
+        labelX = dist
+        labelY = LANDSCAPE_Y + LABEL_PADDING
+        transformation = {rotate: 90, origin: [labelX - TWEAK, labelY]}
+      } else {
+        x = PORTRAIT_X
+        y = dist
+        labelX = PORTRAIT_X + LABEL_PADDING
+        labelY = dist + TWEAK
+        transformation = {}
+      }
 
+      const dot = dots.group()
+      dot.circle().radius(DOT_SIZE).center(x, y).id(name)
+      dot.text(name + ' (' + zman.toLocaleString("en-US", options) + ')').amove(labelX, labelY).transform(transformation).font({family: 'Helvetica', size: FONT_SIZE})
     })
   }
 
@@ -115,16 +158,32 @@ function App() {
     const minutes = nowTime.getMinutes()
     const dist = hours * 30 + minutes / 2 - 50
 
+    let x, y, labelX, labelY, transformation
+      if (orientation === 'landscape') {
+        x = dist
+        y = LANDSCAPE_Y
+        labelX = dist
+        labelY = LANDSCAPE_Y + LABEL_PADDING
+        transformation = {rotate: 90, origin: [labelX - TWEAK, labelY]}
+      } else {
+        x = PORTRAIT_X
+        y = dist
+        labelX = PORTRAIT_X + LABEL_PADDING
+        labelY = dist + TWEAK
+        transformation = {}
+      }
+
     const group = draw.group()
     nowGroup && nowGroup.remove()
     setNowGroup(group)
-    group.circle().radius(3).center(dist, 25).addClass('dot').id('now')
-    group.text(`now (${nowTime.toLocaleString("en-US", options)})`).move(dist, 50).transform({rotate: 90, origin: [dist + 12, 50]}).font({family: 'Helvetica', size: 10}).fill('#F77')
+    group.circle().radius(DOT_SIZE).center(x, y).addClass('dot').id('now')
+    group.text(`now (${nowTime.toLocaleString("en-US", options)})`).amove(labelX, labelY).transform(transformation).font({family: 'Helvetica', size: FONT_SIZE}).fill('#F77')
   }
 
 
   const drawTimeline = (draw) => {
-    draw.line( 0, 25, DIM, 25).stroke({width: 1, color: '#000'})
+    const { x1, x2, y1, y2 } = COORDINATES[orientation].timeline    
+    draw.line( x1, y1, x2, y2).stroke({width: 1, color: '#000'})
   }
 
 
