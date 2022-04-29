@@ -14,8 +14,6 @@ const FONT = 'Helvetica'
 const FONT_SIZE = 10
 const TWEAK_RATIO = 0.3
 const TWEAK = FONT_SIZE * TWEAK_RATIO
-
-
 const COORDINATES = {
   landscape: {
     timeline: {
@@ -34,6 +32,7 @@ const COORDINATES = {
     }
   },
 }
+
 
 function App() {
   const [nowTime, setNowTime] = useState(new Date())
@@ -84,6 +83,7 @@ function App() {
     setChecked(!checked)
     draw.remove()
   }
+
 
   // Check if the 'now dot' needs updating. (On minute change)
   const checkNowDot = () => {
@@ -180,7 +180,7 @@ function App() {
   return (
     <div className="App" >
       <div className="header">
-        {headerText}
+        <h2>{headerText}</h2>
       </div>
       <div>
         <label>
