@@ -4,7 +4,7 @@ import {ourZmanim} from './lib/util.js'
 import { SVG } from '@svgdotjs/svg.js'
 
 const DIM = 800
-const ZIP = '19143'
+const ZIP = '01060'
 const SECOND_MS = 1000
 const DOT_SIZE = 3
 const LANDSCAPE_Y = 25
